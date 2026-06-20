@@ -1,0 +1,50 @@
+أنت مطور ويب محترف (Frontend Expert). أريدك أن تبني لي موقع نتائج كرة قدم مباشر يعمل بملفات HTML/CSS/JS ساكنة (Static) فقط.
+
+قواعد أساسية:
+1. لا تستخدم أي Backend (لا Node.js، لا Express، لا Python).
+2. الموقع يجب أن يكون ملفاً واحداً باسم index.html (استخدم Tailwind CSS و Font Awesome و Google Fonts عبر CDN).
+3. يجب معالجة مشكلة CORS عن طريق إضافة هذا البروكسي المجاني قبل أي طلب API: https://corsproxy.io/?url= (مثال: fetch('https://corsproxy.io/?url=https://api.sofascore.com/...')).
+
+الـ APIs المستخدمة (من SofaScore):
+1. مباريات يوم معين:
+الرابط الأساسي: https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
+(استبدل YYYY-MM-DD بتاريخ اليوم)
+
+2. أحداث مباراة (أهداف، بطاقات، استبدالات):
+الرابط: https://api.sofascore.com/api/v1/event/EVENT_ID/incidents
+
+3. شعار فريق (لا يحتاج بروكسي، ضعه مباشرة في src للصورة):
+الرابط: https://api.sofascore.com/api/v1/team/TEAM_ID/image
+
+4. الأخبار (من rss2json):
+الرابط: https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=كرة+القدم&hl=ar&gl=EG&ceid=EG:ar
+
+هيكل البيانات المتوقع من SofaScore (لكي تكتب الكود بناءً عليه):
+- event.homeTeam.name / event.awayTeam.name
+- event.homeScore.current / event.awayScore.current
+- event.status.type (قيمتها "inprogress" تعني مباشر، "finished" تعني انتهت، أي شيء آخر يعني قادمة)
+- event.status.description (مثل: "1st Half", "2nd Half", "Finished")
+- event.tournament.name (اسم الدوري)
+- event.homeTeam.id / event.awayTeam.id (لجلب الشعارات)
+- في الـ incidents: inc.incidentType (goal, card, substitution), inc.time, inc.player.shortName, inc.incidentClass (yellow, red)
+
+المتطلبات التصميمية والوظيفية:
+1. التصميم: عربي RTL، خلفية سوداء داكنة (#0a0e17)، لون أخضر رئيسي (#22c55e)، خط Tajawal.
+2. شريط مباشر: شريط أحمر متحرك في أعلى الصفحة، يظهر فقط إذا وجد مباراة status.type === "inprogress"، يعرض النتيجة وأسماء الفرق.
+3. التاريخ: أزرار (اليوم السابق، اليوم التالي، زر "اليوم") + تغيير التاريخ يعيد جلب البيانات.
+4. تبويبات: (المباريات - ترتيب الدوريات - الأخبار).
+5. بطاقات المباريات: 
+   - مصنفة: المباشرة أولاً (بحدود حمراء متوهجة ونقطة نابضة)، ثم القادمة، ثم المنتهية.
+   - تعرض: شعاري الفريقين (إذا فشل تحميل الصورة، اعرض أول حرفين من اسم الفريق في دائرة خضراء)، اسم الدوري، النتيجة أو وقت المباراة.
+6. الفلتر: أسفل التبويب مباشرة، أزرار صغيرة لفلترة المباريات حسب الدوري (تُستخرج ديناميكياً من البيانات).
+7. نافذة التفاصيل (Modal): عند الضغط على بطاقة مباراة، تفتح نافذة أنيقة تعرض:
+   - النتيجة والشعارات بحجم كبير.
+   - جدول الأهداف (من سجل، الدقيقة، النتيجة بعد الهدف).
+   - البطاقات الصفراء والحمراء.
+   - الاستبدالات.
+8. التحديث اللحظي: استخدم setInterval كل 30 ثانية لجلب البيانات وتحديث بطاقات المباريات "المباشرة" فقط بدون إعادة تحميل الصفحة.
+9. تبويب الأخبار: اعرض المقالات القادمة من RSS في بطاقات جميلة تحتوي على صورة، عنوان، وصف مختصر، ورابط يفتح في تبويب جديد.
+10. معالجة الأخطاء: أظهر "Skeleton Loading" أثناء التحميل. إذا فشلت الـ API، أظهر رسالة "تعذر تحميل البيانات، حاول لاحقاً".
+
+مهم جداً لبيئة Replit:
+اكتب كل شيء في ملف index.html واحد. عندما أنتهي وأضغط "Run"، يجب أن تفتح الصفحة وتعمل فوراً بدون أي إعدادات إضافية.

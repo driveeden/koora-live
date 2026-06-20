@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "نتائج كرة القدم المباشرة"
+version = "1.0.0"
+id = "artifacts/football-scores"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26220
+
+[services.development]
+run = "pnpm --filter @workspace/football-scores run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/football-scores", "run", "build" ]
+publicDir = "artifacts/football-scores/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26220"
+BASE_PATH = "/"
