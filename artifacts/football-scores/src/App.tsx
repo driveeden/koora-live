@@ -23,13 +23,14 @@ interface Match {
 interface Incident {
   incidentType: string;
   incidentClass?: string;
-  time: number;
+  time: string;
   player?: { shortName?: string };
   isHome?: boolean;
   homeScore?: number;
   awayScore?: number;
   playerIn?: { shortName?: string };
   playerOut?: { shortName?: string };
+  text?: string;
 }
 
 interface NewsItem {
@@ -192,6 +193,7 @@ function MatchCard({ match, onClick }: { match: Match; onClick: () => void }) {
 function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<"goals" | "cards" | "subs" | "all">("all");
 
   useEffect(() => {
     async function fetchIncidents() {
@@ -211,11 +213,28 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
   const goals = incidents.filter((i) => i.incidentType === "goal");
   const cards = incidents.filter((i) => i.incidentType === "card");
   const subs = incidents.filter((i) => i.incidentType === "substitution");
+  const allEvents = incidents;
+
+  const displayed =
+    activeSection === "goals" ? goals :
+    activeSection === "cards" ? cards :
+    activeSection === "subs" ? subs :
+    allEvents;
+
+  const incidentIcon = (inc: Incident) => {
+    if (inc.incidentType === "goal") return "⚽";
+    if (inc.incidentType === "card")
+      return <span className="card-icon" style={{ background: inc.incidentClass === "red" ? "#ef4444" : "#eab308" }} />;
+    if (inc.incidentType === "substitution") return "🔄";
+    return "•";
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>✕</button>
+
+        {/* Tournament + status */}
         <div className="modal-header">
           <span className="modal-tournament">{match.league}</span>
           {match.status === "inprogress" && (
@@ -224,23 +243,70 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
               {match.statusDesc || "مباشر"}
             </span>
           )}
+          {match.status === "finished" && (
+            <span className="finished-badge">انتهت</span>
+          )}
         </div>
 
-        <div className="modal-teams">
+        {/* Hero score section */}
+        <div className="modal-hero">
           <div className="modal-team">
-            <TeamLogo logo={match.homeTeam.logo} name={match.homeTeam.name} size={64} />
+            <TeamLogo logo={match.homeTeam.logo} name={match.homeTeam.name} size={72} />
             <span className="modal-team-name">{match.homeTeam.name}</span>
+            <span className="modal-team-side">الفريق المضيف</span>
           </div>
-          <div className="modal-score">
-            <span className="modal-score-num">{match.homeScore}</span>
-            <span className="modal-score-sep">-</span>
-            <span className="modal-score-num">{match.awayScore}</span>
+
+          <div className="modal-score-block">
+            <div className="modal-score">
+              <span className={`modal-score-num ${match.status === "inprogress" ? "score-live" : ""}`}>
+                {match.homeScore}
+              </span>
+              <span className="modal-score-sep">:</span>
+              <span className={`modal-score-num ${match.status === "inprogress" ? "score-live" : ""}`}>
+                {match.awayScore}
+              </span>
+            </div>
+            {match.status === "inprogress" && (
+              <div className="modal-clock">
+                <span className="live-dot" />
+                <span>{match.statusDesc}</span>
+              </div>
+            )}
+            {match.status === "finished" && (
+              <div className="modal-status-text">نهاية المباراة</div>
+            )}
           </div>
+
           <div className="modal-team">
-            <TeamLogo logo={match.awayTeam.logo} name={match.awayTeam.name} size={64} />
+            <TeamLogo logo={match.awayTeam.logo} name={match.awayTeam.name} size={72} />
             <span className="modal-team-name">{match.awayTeam.name}</span>
+            <span className="modal-team-side">الفريق الضيف</span>
           </div>
         </div>
+
+        {/* Stats tabs */}
+        {!loading && incidents.length > 0 && (
+          <div className="modal-tabs">
+            <button className={`modal-tab ${activeSection === "all" ? "modal-tab-active" : ""}`} onClick={() => setActiveSection("all")}>
+              الكل ({allEvents.length})
+            </button>
+            {goals.length > 0 && (
+              <button className={`modal-tab ${activeSection === "goals" ? "modal-tab-active" : ""}`} onClick={() => setActiveSection("goals")}>
+                ⚽ ({goals.length})
+              </button>
+            )}
+            {cards.length > 0 && (
+              <button className={`modal-tab ${activeSection === "cards" ? "modal-tab-active" : ""}`} onClick={() => setActiveSection("cards")}>
+                🟨 ({cards.length})
+              </button>
+            )}
+            {subs.length > 0 && (
+              <button className={`modal-tab ${activeSection === "subs" ? "modal-tab-active" : ""}`} onClick={() => setActiveSection("subs")}>
+                🔄 ({subs.length})
+              </button>
+            )}
+          </div>
+        )}
 
         {loading && (
           <div className="modal-loading">
@@ -249,54 +315,37 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
           </div>
         )}
 
-        {!loading && (
+        {!loading && incidents.length === 0 && (
+          <div className="no-incidents">
+            <span style={{ fontSize: 32 }}>⚽</span>
+            <p>لا توجد أحداث مسجلة حتى الآن</p>
+          </div>
+        )}
+
+        {!loading && incidents.length > 0 && (
           <div className="modal-incidents">
-            {goals.length > 0 && (
-              <div className="incidents-section">
-                <h3 className="incidents-title">⚽ الأهداف</h3>
-                {goals.map((g, i) => (
-                  <div key={i} className={`incident-row ${g.isHome ? "incident-home" : "incident-away"}`}>
-                    <span className="incident-time">{g.time}′</span>
-                    <span className="incident-player">{g.player?.shortName || "—"}</span>
-                    {g.homeScore !== undefined && (
-                      <span className="incident-score">{g.homeScore} - {g.awayScore}</span>
+            {displayed.map((inc, i) => (
+              <div key={i} className={`incident-row-v2 ${inc.isHome ? "incident-home-v2" : "incident-away-v2"}`}>
+                <div className={`incident-side-bar ${inc.isHome ? "bar-home" : "bar-away"}`} />
+                <div className="incident-icon-wrap">
+                  {incidentIcon(inc)}
+                </div>
+                <div className="incident-body">
+                  <div className="incident-main">
+                    <span className="incident-name">{inc.player?.shortName || "—"}</span>
+                    {inc.incidentType === "substitution" && inc.playerOut && (
+                      <span className="incident-sub-out">← {inc.playerOut.shortName}</span>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
-
-            {cards.length > 0 && (
-              <div className="incidents-section">
-                <h3 className="incidents-title">🟨 البطاقات</h3>
-                {cards.map((c, i) => (
-                  <div key={i} className={`incident-row ${c.isHome ? "incident-home" : "incident-away"}`}>
-                    <span className="incident-time">{c.time}′</span>
-                    <span
-                      className="card-icon"
-                      style={{ background: c.incidentClass === "red" ? "#ef4444" : "#eab308" }}
-                    />
-                    <span className="incident-player">{c.player?.shortName || "—"}</span>
+                  <div className="incident-meta">
+                    <span className={`incident-team-tag ${inc.isHome ? "tag-home" : "tag-away"}`}>
+                      {inc.isHome ? match.homeTeam.name : match.awayTeam.name}
+                    </span>
                   </div>
-                ))}
+                </div>
+                <span className="incident-time-v2">{inc.time}</span>
               </div>
-            )}
-
-            {subs.length > 0 && (
-              <div className="incidents-section">
-                <h3 className="incidents-title">🔄 الاستبدالات</h3>
-                {subs.map((s, i) => (
-                  <div key={i} className={`incident-row ${s.isHome ? "incident-home" : "incident-away"}`}>
-                    <span className="incident-time">{s.time}′</span>
-                    <span className="incident-player">{s.player?.shortName || "—"}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {goals.length === 0 && cards.length === 0 && subs.length === 0 && (
-              <p className="no-incidents">لا توجد أحداث مسجلة</p>
-            )}
+            ))}
           </div>
         )}
       </div>

@@ -154,41 +154,66 @@ router.get("/match/:id/incidents", async (req, res) => {
     const upstream = await fetch(url, { headers: HEADERS });
     const data = (await upstream.json()) as Record<string, unknown>;
 
-    const plays = (data.plays as Array<Record<string, unknown>>) || [];
-    const incidents = plays
-      .filter((p) => {
-        const t = String(p.type?.text || "");
-        return (
-          t.includes("Goal") ||
-          t.includes("Yellow") ||
-          t.includes("Red") ||
-          t.includes("Substitution")
-        );
+    const keyEvents = (data.keyEvents as Array<Record<string, unknown>>) || [];
+
+    // Extract home/away team names from the header
+    const header = data.header as Record<string, unknown> | undefined;
+    const competitions = (header?.competitions as Array<Record<string, unknown>>) || [];
+    const competitors = (competitions[0]?.competitors as Array<Record<string, unknown>>) || [];
+    const homeTeamName = String(
+      (competitors.find((c) => c.homeAway === "home") as Record<string, unknown> | undefined)
+        ?.team?.displayName || ""
+    );
+
+    const incidents = keyEvents
+      .filter((e) => {
+        const t = String((e.type as Record<string, unknown>)?.type || "");
+        return ["goal", "yellow-card", "red-card", "substitution"].includes(t);
       })
-      .map((p) => {
-        const typeText = String(p.type?.text || "").toLowerCase();
+      .map((e) => {
+        const typeObj = e.type as Record<string, unknown>;
+        const typeSlug = String(typeObj?.type || "");
+        const clock = e.clock as Record<string, unknown> | undefined;
+        const text = String(e.text || "");
+        const teamName = String(e.team || "");
+
         let incidentType = "other";
         let incidentClass: string | undefined;
-        if (typeText.includes("goal")) incidentType = "goal";
-        else if (typeText.includes("yellow")) {
-          incidentType = "card";
-          incidentClass = "yellow";
-        } else if (typeText.includes("red")) {
-          incidentType = "card";
-          incidentClass = "red";
-        } else if (typeText.includes("substitution")) incidentType = "substitution";
+        if (typeSlug === "goal") incidentType = "goal";
+        else if (typeSlug === "yellow-card") { incidentType = "card"; incidentClass = "yellow"; }
+        else if (typeSlug === "red-card") { incidentType = "card"; incidentClass = "red"; }
+        else if (typeSlug === "substitution") incidentType = "substitution";
 
-        const athletes = (p.participants as Array<Record<string, unknown>>) || [];
-        const player = athletes[0]?.athlete as Record<string, unknown> | undefined;
+        // Extract player name: for goal/card first sentence usually has "PlayerName (Team)"
+        let playerName = "—";
+        const matchPlayer = text.match(/^(?:Goal[^.]*\.\s)?([^(]+)\(([^)]+)\)/);
+        if (matchPlayer) {
+          playerName = matchPlayer[1].trim();
+        } else {
+          // For substitutions: "Substitution, Team. PlayerIn replaces PlayerOut."
+          const subMatch = text.match(/\.\s*(.+?) replaces/);
+          if (subMatch) playerName = subMatch[1].trim();
+        }
+
+        // Extract "replaces" for substitution
+        let playerOut: string | undefined;
+        if (incidentType === "substitution") {
+          const outMatch = text.match(/replaces (.+?)\.?$/);
+          if (outMatch) playerOut = outMatch[1].trim();
+        }
+
+        const isHome = homeTeamName
+          ? teamName.toLowerCase() === homeTeamName.toLowerCase()
+          : true;
 
         return {
           incidentType,
           incidentClass,
-          time: Math.round(Number(p.clock?.value || 0) / 60),
-          player: { shortName: String(player?.shortName || player?.displayName || "—") },
-          isHome: Boolean(p.homeAway === "home"),
-          homeScore: p.homeScore,
-          awayScore: p.awayScore,
+          time: String(clock?.displayValue || ""),
+          player: { shortName: playerName },
+          playerOut: playerOut ? { shortName: playerOut } : undefined,
+          isHome,
+          text,
         };
       });
 
