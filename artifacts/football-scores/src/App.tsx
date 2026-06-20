@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Router, Route, Switch, Link, useLocation } from "wouter";
+import Blog from "./pages/Blog";
+import ArticlePage from "./pages/ArticlePage";
 
 const API_BASE = "/api";
 
@@ -585,6 +588,7 @@ export default function App() {
       <nav className="main-nav">
         <button className={`nav-tab ${activeTab === "matches" ? "nav-tab-active" : ""}`} onClick={() => setActiveTab("matches")}>المباريات</button>
         <button className={`nav-tab ${activeTab === "news" ? "nav-tab-active" : ""}`} onClick={() => setActiveTab("news")}>الأخبار</button>
+        <Link href="/blog" className={`nav-tab`}>المقالات</Link>
       </nav>
 
       <main className="main-content">
@@ -634,5 +638,17 @@ export default function App() {
 
       {selectedMatch && <MatchModal match={selectedMatch} onClose={() => setSelectedMatch(null)} />}
     </div>
+  );
+}
+
+export default function AppRoot() {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/blog/:slug" component={ArticlePage} />
+        <Route path="/blog" component={Blog} />
+        <Route component={App} />
+      </Switch>
+    </Router>
   );
 }

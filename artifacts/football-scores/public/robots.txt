@@ -1,2 +1,10 @@
 User-agent: *
 Allow: /
+
+Sitemap: /api/sitemap.xml
+
+# Crawl-delay for bots
+Crawl-delay: 1
+
+# Disallow internal API paths
+Disallow: /api/internal/
