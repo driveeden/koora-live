@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Router, Route, Switch, Link, useLocation } from "wouter";
+import { Router, Route, Switch, Link } from "wouter";
 import Blog from "./pages/Blog";
 import ArticlePage from "./pages/ArticlePage";
 
@@ -538,7 +538,7 @@ function groupMatches(matches: Match[]) {
 }
 
 // ─── App ──────────────────────────────────────────────────────────────────────
-export default function App() {
+function App() {
   const [activeTab, setActiveTab] = useState<"matches" | "news">("matches");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [matches, setMatches] = useState<Match[]>([]);
