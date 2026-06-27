@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useRoute } from "wouter";
-import { getArticleBySlug, getRelatedArticles } from "../data/articles";
+import { getArticleBySlug, getRelatedArticles } from "../data/all-articles";
 
 export default function ArticlePage() {
   const [, params] = useRoute("/blog/:slug");

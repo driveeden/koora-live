@@ -10,6 +10,7 @@ export interface Article {
   tags: string[];
   readTime: number;
   content: string;
+  lang?: string;
 }
 
 const img = (id: string, w = 800) =>

@@ -1,15 +1,21 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
-import { articles, CATEGORIES } from "../data/articles";
+import { allArticles, CATEGORIES, LANGUAGES } from "../data/all-articles";
 
 export default function Blog() {
   const [activeCategory, setActiveCategory] = useState("الكل");
+  const [activeLang, setActiveLang] = useState("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
 
   const filtered = useMemo(() => {
-    let list = [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    let list = [...allArticles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (activeLang === "all") {
+      list = list.filter(a => !a.lang || a.lang === "ar");
+    } else {
+      list = list.filter(a => (a.lang ?? "ar") === activeLang);
+    }
     if (activeCategory !== "الكل") list = list.filter(a => a.category === activeCategory);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
@@ -20,12 +26,14 @@ export default function Blog() {
       );
     }
     return list;
-  }, [activeCategory, search]);
+  }, [activeCategory, activeLang, search]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const featured = articles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 1)[0];
+  const featured = [...allArticles]
+    .filter(a => !a.lang || a.lang === "ar")
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
   return (
     <div className="blog-page">
@@ -56,16 +64,29 @@ export default function Blog() {
         />
       </div>
 
-      {/* Category Filters */}
-      <div className="blog-cats">
-        {["الكل", ...CATEGORIES].map(cat => (
+      {/* Language Filter */}
+      <div className="blog-langs">
+        {LANGUAGES.map(lang => (
           <button
-            key={cat}
-            className={`blog-cat-btn ${activeCategory === cat ? "blog-cat-active" : ""}`}
-            onClick={() => { setActiveCategory(cat); setPage(1); }}
-          >{cat}</button>
+            key={lang.code}
+            className={`blog-lang-btn ${activeLang === lang.code ? "blog-lang-active" : ""}`}
+            onClick={() => { setActiveLang(lang.code); setActiveCategory("الكل"); setPage(1); }}
+          >{lang.label}</button>
         ))}
       </div>
+
+      {/* Category Filters — only for Arabic */}
+      {(activeLang === "all" || activeLang === "ar") && (
+        <div className="blog-cats">
+          {["الكل", ...CATEGORIES].map(cat => (
+            <button
+              key={cat}
+              className={`blog-cat-btn ${activeCategory === cat ? "blog-cat-active" : ""}`}
+              onClick={() => { setActiveCategory(cat); setPage(1); }}
+            >{cat}</button>
+          ))}
+        </div>
+      )}
 
       {/* Results count */}
       <div className="blog-count">{filtered.length} مقالة</div>
