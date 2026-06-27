@@ -579,9 +579,16 @@ function App() {
       <LiveTicker matches={matches} />
 
       <header className="site-header">
-        <div className="site-brand">
-          <span className="brand-icon">⚽</span>
-          <span className="brand-text">كورة لايف</span>
+        <a href="/" className="site-brand">
+          <div className="brand-icon">⚽</div>
+          <div className="brand-info">
+            <span className="brand-text">كورة لايف</span>
+            <span className="brand-tagline">نتائج المباريات المباشرة</span>
+          </div>
+        </a>
+        <div className="header-badge">
+          <span className="header-badge-dot" />
+          <span className="header-badge-text">مباشر</span>
         </div>
       </header>
 
@@ -637,6 +644,26 @@ function App() {
       </main>
 
       {selectedMatch && <MatchModal match={selectedMatch} onClose={() => setSelectedMatch(null)} />}
+
+      <footer className="site-footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <div className="footer-logo">⚽</div>
+            <div>
+              <div className="footer-brand-name">كورة لايف</div>
+              <div className="footer-brand-sub">نتائج كرة القدم المباشرة من جميع الدوريات</div>
+            </div>
+          </div>
+          <div className="footer-links">
+            <a href="/" className="footer-link">المباريات</a>
+            <a href="/blog" className="footer-link">المقالات</a>
+            <a href="/sitemap.xml" className="footer-link" target="_blank" rel="noopener noreferrer">Sitemap</a>
+          </div>
+          <div className="footer-copy">
+            © {new Date().getFullYear()} كورة لايف · جميع الحقوق محفوظة
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
