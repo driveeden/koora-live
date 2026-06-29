@@ -1,29 +1,18 @@
 {
   "version": 2,
-  "buildCommand": "pnpm --filter @workspace/football-scores run build",
-  "outputDirectory": "vercel-dist",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "framework": null,
-  "env": {
-    "BASE_PATH": "/",
-    "NODE_ENV": "production"
-  },
-  "rewrites": [
-    { "source": "/api/match/:id/incidents", "destination": "/api/match/[id]/incidents" },
-    { "source": "/api/:path*", "destination": "/api/:path*" },
-    { "source": "/((?!api).*)", "destination": "/index.html" }
-  ],
-  "headers": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "s-maxage=30, stale-while-revalidate=60" }
-      ]
-    },
-    {
-      "source": "/sitemap.xml",
-      "headers": [{ "key": "Content-Type", "value": "application/xml" }]
+      "src": "artifacts/api-server/dist/index.mjs",
+      "use": "@vercel/node"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "artifacts/api-server/dist/index.mjs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
