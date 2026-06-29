@@ -200,9 +200,9 @@ router.get("/match/:id/incidents", async (req, res) => {
     const venue = (gameInfo?.venue as Record<string, unknown> | undefined)?.fullName ?? null;
     const attendance = (gameInfo?.attendance as number) ?? null;
     const officials = (gameInfo?.officials as Array<Record<string, unknown>>) ?? [];
-    const referee = officials.find(
+    const referee = (officials.find(
       (o) => String((o.position as Record<string, unknown>)?.id) === "1"
-    )?.displayName ?? null;
+    ) as Record<string, unknown> | undefined)?.displayName ?? null;
 
     // ── Broadcasts ──
     const rawBroadcasts = (data.broadcasts as Array<Record<string, unknown>>) ?? [];
@@ -215,8 +215,8 @@ router.get("/match/:id/incidents", async (req, res) => {
     const headerComps = (header?.competitions as Array<Record<string, unknown>>) ?? [];
     const competitors = (headerComps[0]?.competitors as Array<Record<string, unknown>>) ?? [];
     const homeTeamName = String(
-      (competitors.find((c) => c.homeAway === "home") as Record<string, unknown> | undefined)
-        ?.team?.displayName ?? ""
+      ((competitors.find((c) => c.homeAway === "home") as Record<string, unknown> | undefined)
+        ?.team as Record<string, unknown> | undefined)?.displayName ?? ""
     );
 
     // Try to detect league from season
