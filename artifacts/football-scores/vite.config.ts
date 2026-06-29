@@ -42,7 +42,9 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "../../vercel-dist"),
+    outDir: process.env.NODE_ENV === "production" 
+      ? path.resolve(import.meta.dirname, "../../vercel-dist")
+      : path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
   },
   server: {
