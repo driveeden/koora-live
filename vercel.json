@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "pnpm --filter @workspace/football-scores run build && echo 'Build complete'",
-  "outputDirectory": "vercel-dist",
+  "buildCommand": "cd artifacts/football-scores && pnpm run build",
+  "outputDirectory": "./vercel-dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
   "env": {
