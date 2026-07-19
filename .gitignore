@@ -47,3 +47,11 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Vercel
+.vercel/
+
+# Build outputs
+artifacts/football-scores/dist/
+artifacts/api-server/dist/
+artifacts/mockup-sandbox/dist/

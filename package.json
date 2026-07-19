@@ -1,12 +1,15 @@
 {
   "name": "koora-live",
   "version": "1.0.0",
-  "main": "api-server.js",
+  "private": true,
+  "packageManager": "pnpm@10.26.1",
   "scripts": {
-    "start": "node api-server.js"
+    "dev:api": "node artifacts/api-server/dist/index.mjs",
+    "build:frontend": "BASE_PATH=/ pnpm --filter @workspace/football-scores build",
+    "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "express": "^4.18.2",
-    "node-fetch": "^2.7.0"
+  "devDependencies": {
+    "@vercel/node": "^5.1.0",
+    "@types/node": "^22.0.0"
   }
 }

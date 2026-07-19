@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "framework": null,
+  "installCommand": "pnpm install",
+  "buildCommand": "BASE_PATH=/ pnpm --filter @workspace/football-scores build",
+  "outputDirectory": "artifacts/football-scores/dist/public",
+  "rewrites": [
+    { "source": "/api/sitemap.xml",       "destination": "/api/sitemap"           },
+    { "source": "/api/sitemap-news.xml",  "destination": "/api/sitemap-news"      },
+    { "source": "/api/match/:id/incidents","destination": "/api/incidents?id=:id" },
+    { "source": "/((?!api/).*)",          "destination": "/index.html"            }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin",  "value": "*"              },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS"    },
+        { "key": "Cache-Control",                "value": "s-maxage=30"    }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff"       },
+        { "key": "X-Frame-Options",        "value": "DENY"          },
+        { "key": "X-XSS-Protection",       "value": "1; mode=block" }
+      ]
+    }
+  ]
+}
