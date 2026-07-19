@@ -56,10 +56,21 @@ body {
 .site-header {
   background: linear-gradient(180deg,#0d1320 0%,var(--bg) 100%);
   border-bottom: 1px solid var(--border);
-  padding: 16px 20px;
-  display: flex; justify-content: center;
+  padding: 12px 20px;
+  display: flex; justify-content: space-between; align-items: center;
 }
 .site-brand { display:flex; align-items:center; gap:10px; }
+
+/* ── Language Switcher ── */
+.lang-switcher { display:flex; align-items:center; gap:4px; }
+.lang-btn {
+  background: var(--card); border: 1px solid var(--border); color: var(--muted);
+  font-family: 'Inter', 'Tajawal', sans-serif; font-size: 12px; font-weight: 600;
+  padding: 5px 10px; border-radius: 20px; cursor: pointer;
+  transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: 4px;
+}
+.lang-btn:hover { color: var(--text); border-color: var(--green); }
+.lang-btn-active { background: var(--green-dark)!important; border-color: var(--green)!important; color: #fff!important; }
 .brand-icon { font-size:28px; filter:drop-shadow(0 0 10px var(--green-glow)); }
 .brand-text {
   font-size:24px; font-weight:900;
@@ -863,6 +874,7 @@ body {
 .share-btn:hover { opacity: .8; }
 .share-twitter { background: #000; color: #fff; border: 1px solid #333; }
 .share-whatsapp { background: #25d366; color: #fff; }
+.share-facebook { background: #1877f2; color: #fff; }
 
 /* ── Related ── */
 .related-section { margin-bottom: 32px; }

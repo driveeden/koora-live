@@ -1,10 +1,30 @@
+# robots.txt — كورة لايف | Koora Live
+# https://koora-live--driveeden.replit.app/
+
 User-agent: *
 Allow: /
+Allow: /blog
+Allow: /blog/
+Disallow: /api/internal/
+Disallow: /api/matches
+Disallow: /api/match/
+Disallow: /api/news
+Crawl-delay: 2
 
-Sitemap: /api/sitemap.xml
-
-# Crawl-delay for bots
+# Googlebot
+User-agent: Googlebot
+Allow: /
+Allow: /blog
+Allow: /blog/
+Disallow: /api/internal/
 Crawl-delay: 1
 
-# Disallow internal API paths
-Disallow: /api/internal/
+# Bingbot
+User-agent: Bingbot
+Allow: /
+Allow: /blog
+Crawl-delay: 2
+
+# Sitemaps
+Sitemap: https://koora-live--driveeden.replit.app/api/sitemap.xml
+Sitemap: https://koora-live--driveeden.replit.app/api/sitemap-news.xml

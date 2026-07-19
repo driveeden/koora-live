@@ -1,34 +1,54 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { articles, CATEGORIES } from "../data/articles";
+import { articlesEN, CATEGORIES_EN } from "../data/articles-en";
+import { getLang } from "../i18n";
 
 export default function Blog() {
-  const [activeCategory, setActiveCategory] = useState("الكل");
+  const lang = getLang();
+  const isAr = lang === "ar";
+  const isFr = lang === "fr";
+
+  const allArticles = useMemo(() => {
+    if (isAr || isFr) return articles;
+    return articlesEN as any[];
+  }, [isAr, isFr]);
+
+  const allCategories = isAr || isFr ? CATEGORIES : CATEGORIES_EN;
+  const allLabel = isAr || isFr ? "الكل" : "All";
+  const searchPlaceholder = isAr ? "🔍 ابحث في المقالات..." : isFr ? "🔍 Rechercher..." : "🔍 Search articles...";
+  const countLabel = isAr || isFr ? "مقالة" : "articles";
+  const prevLabel = isAr ? "◀ السابق" : isFr ? "◀ Précédent" : "◀ Prev";
+  const nextLabel = isAr ? "التالي ▶" : isFr ? "Suivant ▶" : "Next ▶";
+  const minuteLabel = isAr ? "دقائق" : isFr ? "min" : "min";
+
+  const [activeCategory, setActiveCategory] = useState(allLabel);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
 
   const filtered = useMemo(() => {
-    let list = [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    if (activeCategory !== "الكل") list = list.filter(a => a.category === activeCategory);
+    let list = [...allArticles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (activeCategory !== allLabel) list = list.filter(a => a.category === activeCategory);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter(a =>
         a.title.toLowerCase().includes(q) ||
         a.description.toLowerCase().includes(q) ||
-        a.tags.some(t => t.toLowerCase().includes(q))
+        a.tags.some((t: string) => t.toLowerCase().includes(q))
       );
     }
     return list;
-  }, [activeCategory, search]);
+  }, [activeCategory, search, allArticles, allLabel]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const featured = [...allArticles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-  const featured = articles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 1)[0];
+  const dateLocale = isAr ? "ar-EG" : isFr ? "fr-FR" : "en-GB";
 
   return (
-    <div className="blog-page">
+    <div className="blog-page" dir={isAr ? "rtl" : "ltr"} lang={lang}>
       {/* Hero Featured */}
       <div className="blog-hero">
         <Link href={`/blog/${featured.slug}`}>
@@ -38,8 +58,8 @@ export default function Blog() {
             <h1 className="blog-hero-title">{featured.title}</h1>
             <p className="blog-hero-desc">{featured.description}</p>
             <span className="blog-hero-meta">
-              {new Date(featured.date).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" })}
-              &nbsp;·&nbsp;{featured.readTime} دقائق قراءة
+              {new Date(featured.date).toLocaleDateString(dateLocale, { year: "numeric", month: "long", day: "numeric" })}
+              &nbsp;·&nbsp;{featured.readTime} {minuteLabel}
             </span>
           </div>
         </Link>
@@ -50,7 +70,7 @@ export default function Blog() {
         <input
           className="blog-search"
           type="text"
-          placeholder="🔍 ابحث في المقالات..."
+          placeholder={searchPlaceholder}
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
         />
@@ -58,7 +78,7 @@ export default function Blog() {
 
       {/* Category Filters */}
       <div className="blog-cats">
-        {["الكل", ...CATEGORIES].map(cat => (
+        {[allLabel, ...allCategories].map(cat => (
           <button
             key={cat}
             className={`blog-cat-btn ${activeCategory === cat ? "blog-cat-active" : ""}`}
@@ -68,7 +88,7 @@ export default function Blog() {
       </div>
 
       {/* Results count */}
-      <div className="blog-count">{filtered.length} مقالة</div>
+      <div className="blog-count">{filtered.length} {countLabel}</div>
 
       {/* Grid */}
       <div className="blog-grid">
@@ -89,12 +109,12 @@ export default function Blog() {
                 <h2 className="blog-card-title">{article.title}</h2>
                 <p className="blog-card-desc">{article.description}</p>
                 <div className="blog-card-meta">
-                  <span>{new Date(article.date).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" })}</span>
-                  <span>{article.readTime} دقائق</span>
+                  <span>{new Date(article.date).toLocaleDateString(dateLocale, { year: "numeric", month: "short", day: "numeric" })}</span>
+                  <span>{article.readTime} {minuteLabel}</span>
                 </div>
                 <div className="blog-card-tags">
-                  {article.tags.slice(0, 3).map(t => (
-                    <span key={t} className="blog-tag">{t}</span>
+                  {article.tags.slice(0, 3).map((tag: string) => (
+                    <span key={tag} className="blog-tag">{tag}</span>
                   ))}
                 </div>
               </div>
@@ -110,7 +130,7 @@ export default function Blog() {
             className="blog-page-btn"
             disabled={page === 1}
             onClick={() => setPage(p => p - 1)}
-          >◀ السابق</button>
+          >{prevLabel}</button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
             <button
               key={p}
@@ -122,7 +142,7 @@ export default function Blog() {
             className="blog-page-btn"
             disabled={page === totalPages}
             onClick={() => setPage(p => p + 1)}
-          >التالي ▶</button>
+          >{nextLabel}</button>
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Router, Route, Switch, Link } from "wouter";
 import Blog from "./pages/Blog";
 import ArticlePage from "./pages/ArticlePage";
+import { getLang, setLang, t, type Lang } from "./i18n";
 
 const API_BASE = "/api";
 
@@ -537,16 +538,48 @@ function groupMatches(matches: Match[]) {
   };
 }
 
+// ─── Language Switcher ────────────────────────────────────────────────────────
+function LangSwitcher({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void }) {
+  const LANGS: { code: Lang; label: string; flag: string }[] = [
+    { code: "ar", label: "عربي", flag: "🇸🇦" },
+    { code: "en", label: "EN", flag: "🇬🇧" },
+    { code: "fr", label: "FR", flag: "🇫🇷" },
+  ];
+  return (
+    <div className="lang-switcher">
+      {LANGS.map(({ code, label, flag }) => (
+        <button
+          key={code}
+          className={`lang-btn ${lang === code ? "lang-btn-active" : ""}`}
+          onClick={() => onChange(code)}
+          title={label}
+        >
+          {flag} {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ─── App ──────────────────────────────────────────────────────────────────────
 function App() {
+  const [lang, setLangState] = useState<Lang>(getLang);
   const [activeTab, setActiveTab] = useState<"matches" | "news">("matches");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [leagueFilter, setLeagueFilter] = useState("الكل");
+  const [leagueFilter, setLeagueFilter] = useState(t(lang).all);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const T = t(lang);
+
+  const handleLangChange = (l: Lang) => {
+    setLang(l);
+    setLangState(l);
+    setLeagueFilter(t(l).all);
+  };
 
   const fetchMatches = useCallback(async (date: Date, silent = false) => {
     if (!silent) setLoading(true);
@@ -559,7 +592,7 @@ function App() {
     finally { if (!silent) setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchMatches(selectedDate); setLeagueFilter("الكل"); }, [selectedDate, fetchMatches]);
+  useEffect(() => { fetchMatches(selectedDate); setLeagueFilter(T.all); }, [selectedDate, fetchMatches]);
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -569,38 +602,46 @@ function App() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [matches, selectedDate, fetchMatches]);
 
-  const leagues = ["الكل", ...Array.from(new Set(matches.map((m) => m.league)))];
-  const filtered = leagueFilter === "الكل" ? matches : matches.filter((m) => m.league === leagueFilter);
+  const allLabel = T.all;
+  const leagues = [allLabel, ...Array.from(new Set(matches.map((m) => m.league)))];
+  const filtered = leagueFilter === allLabel ? matches : matches.filter((m) => m.league === leagueFilter);
   const { live, upcoming, finished } = groupMatches(filtered);
   const isToday = formatDate(selectedDate) === formatDate(new Date());
 
+  const localeDateStr = lang === "ar"
+    ? selectedDate.toLocaleDateString("ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+    : lang === "fr"
+    ? selectedDate.toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+    : selectedDate.toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
   return (
-    <div className="app">
+    <div className="app" dir={lang === "ar" ? "rtl" : "ltr"} lang={lang}>
       <LiveTicker matches={matches} />
 
       <header className="site-header">
         <div className="site-brand">
           <span className="brand-icon">⚽</span>
-          <span className="brand-text">كورة لايف</span>
+          <span className="brand-text">{T.siteTitle}</span>
         </div>
+        <LangSwitcher lang={lang} onChange={handleLangChange} />
       </header>
 
       <nav className="main-nav">
-        <button className={`nav-tab ${activeTab === "matches" ? "nav-tab-active" : ""}`} onClick={() => setActiveTab("matches")}>المباريات</button>
-        <button className={`nav-tab ${activeTab === "news" ? "nav-tab-active" : ""}`} onClick={() => setActiveTab("news")}>الأخبار</button>
-        <Link href="/blog" className={`nav-tab`}>المقالات</Link>
+        <button className={`nav-tab ${activeTab === "matches" ? "nav-tab-active" : ""}`} onClick={() => setActiveTab("matches")}>{T.matches}</button>
+        <button className={`nav-tab ${activeTab === "news" ? "nav-tab-active" : ""}`} onClick={() => setActiveTab("news")}>{T.news}</button>
+        <Link href="/blog" className={`nav-tab`}>{T.articles}</Link>
       </nav>
 
       <main className="main-content">
         {activeTab === "matches" && (
           <>
             <div className="date-nav">
-              <button className="date-btn" onClick={() => setSelectedDate((d) => { const n=new Date(d); n.setDate(n.getDate()-1); return n; })}>◀ السابق</button>
+              <button className="date-btn" onClick={() => setSelectedDate((d) => { const n=new Date(d); n.setDate(n.getDate()-1); return n; })}>{T.prev}</button>
               <div className="date-center">
-                <span className="date-label">{arabicDate(selectedDate)}</span>
-                {!isToday && <button className="today-btn" onClick={() => setSelectedDate(new Date())}>اليوم</button>}
+                <span className="date-label">{localeDateStr}</span>
+                {!isToday && <button className="today-btn" onClick={() => setSelectedDate(new Date())}>{T.today}</button>}
               </div>
-              <button className="date-btn" onClick={() => setSelectedDate((d) => { const n=new Date(d); n.setDate(n.getDate()+1); return n; })}>التالي ▶</button>
+              <button className="date-btn" onClick={() => setSelectedDate((d) => { const n=new Date(d); n.setDate(n.getDate()+1); return n; })}>{T.next}</button>
             </div>
 
             {!loading && leagues.length > 1 && (
@@ -612,21 +653,21 @@ function App() {
             )}
 
             {loading && <div className="matches-list">{Array.from({length:8}).map((_,i)=><SkeletonCard key={i}/>)}</div>}
-            {error && !loading && <div className="error-msg">تعذر تحميل البيانات، حاول لاحقاً</div>}
-            {!loading && !error && filtered.length === 0 && <div className="error-msg">لا توجد مباريات في هذا اليوم</div>}
+            {error && !loading && <div className="error-msg">{T.loadError}</div>}
+            {!loading && !error && filtered.length === 0 && <div className="error-msg">{T.noMatches}</div>}
 
             {!loading && !error && (
               <div className="matches-list">
                 {live.length > 0 && (<>
-                  <div className="section-title"><span className="live-dot" /> المباريات المباشرة ({live.length})</div>
+                  <div className="section-title"><span className="live-dot" /> {T.liveMatches} ({live.length})</div>
                   {live.map((m) => <MatchCard key={m.id} match={m} onClick={() => setSelectedMatch(m)} />)}
                 </>)}
                 {upcoming.length > 0 && (<>
-                  <div className="section-title">القادمة ({upcoming.length})</div>
+                  <div className="section-title">{T.upcoming} ({upcoming.length})</div>
                   {upcoming.map((m) => <MatchCard key={m.id} match={m} onClick={() => setSelectedMatch(m)} />)}
                 </>)}
                 {finished.length > 0 && (<>
-                  <div className="section-title">المنتهية ({finished.length})</div>
+                  <div className="section-title">{T.finished} ({finished.length})</div>
                   {finished.map((m) => <MatchCard key={m.id} match={m} onClick={() => setSelectedMatch(m)} />)}
                 </>)}
               </div>

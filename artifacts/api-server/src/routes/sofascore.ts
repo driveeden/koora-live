@@ -342,22 +342,43 @@ router.get("/match/:id/incidents", async (req, res) => {
 
 // ─── Sitemap XML ──────────────────────────────────────────────────────────────
 const ARTICLE_SLUGS = [
-  "lionel-messi-greatest-of-all-time","cristiano-ronaldo-portuguese-phenomenon","mbappe-future-of-football","mohamed-salah-egyptian-king","erling-haaland-goal-machine","neymar-jr-brazilian-magic","kevin-de-bruyne-assist-king","virgil-van-dijk-best-defender","luka-modric-the-maestro","robert-lewandowski-serial-scorer","vinicius-junior-real-madrid-wing","harry-kane-england-captain","sadio-mane-african-star","karim-benzema-ballon-dor-winner","jude-bellingham-new-generation","rodri-best-midfielder-2024","pedri-barcelona-midfield-maestro","bukayo-saka-arsenal-heart","trent-alexander-arnold-revolutionary-fullback","phil-foden-city-gem","premier-league-overview","la-liga-overview","bundesliga-overview","serie-a-overview","ligue-1-overview","saudi-pro-league","egypt-football-history","champions-league-format","champions-league-top-scorers","africa-football-rise","morocco-world-cup-2022","world-cup-2026-preview","world-cup-2022-analysis","world-cup-records","football-biggest-upsets","tiki-taka-explained","high-press-tactics","pep-guardiola-philosophy","mourinho-defensive-tactics","false-nine-role","modern-fullback-role","counter-attack-football","442-formation","catenaccio-italian-defense","var-controversy","brazil-five-world-cups","real-madrid-european-history","ajax-total-football","football-evolution-tactics","hungary-golden-team","real-madrid-greatest-club","fc-barcelona-history","manchester-city-rise","liverpool-european-tradition","juventus-italian-giant","all-time-top-scorers","transfer-market-records","football-attendance-records","goalkeeper-records","transfer-market-how-it-works","best-free-transfers","football-analytics-revolution","women-football-rise","football-nutrition-fitness","football-stadiums-future","mental-health-football","goalline-technology","football-documentaries","football-referees","african-champions-league-history","saudi-arabia-football-development","arab-football-history","football-esports","atletico-madrid-defensive-masters","paris-saint-germain-transformation","world-cup-host-cities-2026","most-assists-football","europa-league-overview","world-cup-1990-italia","football-coaching-courses","world-cup-finals-history","premier-league-classic-moments","la-liga-classic-derbies","copa-america-history","euro-championship-history","pele-greatest-legacy","zidane-player-coach","serie-b-promotion-battles","football-injuries-recovery","football-youth-academies","bundesliga-rivalries","football-gambling-problem","world-cup-young-stars","chelsea-abramovich-era","arsenal-history","football-world-cup-2018-review","bayern-munich-dominance","football-greatest-rivalries","world-cup-most-successful-nations","football-future-trends"
+  // Arabic articles
+  "lionel-messi-greatest-of-all-time","cristiano-ronaldo-portuguese-phenomenon","mbappe-future-of-football","mohamed-salah-egyptian-king","erling-haaland-goal-machine","neymar-jr-brazilian-magic","kevin-de-bruyne-assist-king","virgil-van-dijk-best-defender","luka-modric-the-maestro","robert-lewandowski-serial-scorer","vinicius-junior-real-madrid-wing","harry-kane-england-captain","sadio-mane-african-star","karim-benzema-ballon-dor-winner","jude-bellingham-new-generation","rodri-best-midfielder-2024","pedri-barcelona-midfield-maestro","bukayo-saka-arsenal-heart","trent-alexander-arnold-revolutionary-fullback","phil-foden-city-gem","premier-league-overview","la-liga-overview","bundesliga-overview","serie-a-overview","ligue-1-overview","saudi-pro-league","egypt-football-history","champions-league-format","champions-league-top-scorers","africa-football-rise","morocco-world-cup-2022","world-cup-2026-preview","world-cup-2022-analysis","world-cup-records","football-biggest-upsets","tiki-taka-explained","high-press-tactics","pep-guardiola-philosophy","mourinho-defensive-tactics","false-nine-role","modern-fullback-role","counter-attack-football","442-formation","catenaccio-italian-defense","var-controversy","brazil-five-world-cups","real-madrid-european-history","ajax-total-football","football-evolution-tactics","hungary-golden-team","real-madrid-greatest-club","fc-barcelona-history","manchester-city-rise","liverpool-european-tradition","juventus-italian-giant","all-time-top-scorers","transfer-market-records","football-attendance-records","goalkeeper-records","transfer-market-how-it-works","best-free-transfers","football-analytics-revolution","women-football-rise","football-nutrition-fitness","football-stadiums-future","mental-health-football","goalline-technology","football-documentaries","football-referees","african-champions-league-history","saudi-arabia-football-development","arab-football-history","football-esports","atletico-madrid-defensive-masters","paris-saint-germain-transformation","world-cup-host-cities-2026","most-assists-football","europa-league-overview","world-cup-1990-italia","football-coaching-courses","world-cup-finals-history","premier-league-classic-moments","la-liga-classic-derbies","copa-america-history","euro-championship-history","pele-greatest-legacy","zidane-player-coach","serie-b-promotion-battles","football-injuries-recovery","football-youth-academies","bundesliga-rivalries","football-gambling-problem","world-cup-young-stars","chelsea-abramovich-era","arsenal-history","football-world-cup-2018-review","bayern-munich-dominance","football-greatest-rivalries","world-cup-most-successful-nations","football-future-trends",
+  // English original articles
+  "messi-goat-debate-analysis","haaland-goal-machine-tactical-breakdown","mbappe-real-madrid-first-season-review","salah-longevity-secret-analysis","bellingham-real-madrid-midfielder-profile","de-bruyne-premier-league-greatest-playmaker","premier-league-2025-26-season-preview","champions-league-2026-final-preview","high-press-tactics-explained-2026","world-cup-2026-host-cities-guide"
 ];
 
 router.get("/sitemap.xml", (_req, res) => {
-  const baseUrl = "https://koora-live.replit.app";
+  const baseUrl = "https://koora-live--driveeden.replit.app";
   const today = new Date().toISOString().split("T")[0];
   const urls = [
     `<url><loc>${baseUrl}/</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>1.0</priority></url>`,
     `<url><loc>${baseUrl}/blog</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`,
     ...ARTICLE_SLUGS.map(slug =>
-      `<url><loc>${baseUrl}/blog/${slug}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`
+      `<url><loc>${baseUrl}/blog/${slug}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`
     ),
   ].join("\n  ");
-  res.header("Content-Type", "application/xml");
+  res.header("Content-Type", "application/xml; charset=utf-8");
+  res.header("X-Robots-Tag", "noindex");
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  ${urls}
+</urlset>`);
+});
+
+router.get("/sitemap-news.xml", (_req, res) => {
+  const baseUrl = "https://koora-live--driveeden.replit.app";
+  const today = new Date().toISOString().split("T")[0];
+  const newsArticles = ARTICLE_SLUGS.slice(0, 20);
+  const urls = newsArticles.map(slug =>
+    `<url><loc>${baseUrl}/blog/${slug}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`
+  ).join("\n  ");
+  res.header("Content-Type", "application/xml; charset=utf-8");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   ${urls}
 </urlset>`);
 });
