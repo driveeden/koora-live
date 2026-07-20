@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "api-server.js",
   "scripts": {
-    "start": "node api-server.js"
+    "start": "node api-server.js",
+    "build": "pnpm --filter @workspace/football-scores run build && rm -rf dist && cp -r artifacts/football-scores/dist ./dist"
   },
   "dependencies": {
     "express": "^4.18.2",
