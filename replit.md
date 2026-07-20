@@ -1,6 +1,6 @@
-# [Project name]
+# كورة لايف
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+موقع نتائج كرة القدم المباشرة مع مقالات متعددة اللغات ولوحة تحليلات الزوار.
 
 ## Run & Operate
 

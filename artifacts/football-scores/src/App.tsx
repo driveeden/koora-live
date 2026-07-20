@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Router, Route, Switch, Link } from "wouter";
+import { Router, Route, Switch, Link, useLocation } from "wouter";
 import Blog from "./pages/Blog";
 import ArticlePage from "./pages/ArticlePage";
+import Analytics from "./pages/Analytics";
+import { trackPageview } from "./lib/analytics";
 
 const API_BASE = "/api";
 
@@ -658,6 +660,7 @@ function App() {
             <a href="/" className="footer-link">المباريات</a>
             <a href="/blog" className="footer-link">المقالات</a>
             <a href="/sitemap.xml" className="footer-link" target="_blank" rel="noopener noreferrer">Sitemap</a>
+            <a href="/analytics" className="footer-link">📊 الإحصائيات</a>
           </div>
           <div className="footer-copy">
             © {new Date().getFullYear()} كورة لايف · جميع الحقوق محفوظة
@@ -668,10 +671,21 @@ function App() {
   );
 }
 
+// ── Page tracker ─────────────────────────────────────────────────────────────
+function PageTracker() {
+  const [location] = useLocation();
+  useEffect(() => {
+    trackPageview(location);
+  }, [location]);
+  return null;
+}
+
 export default function AppRoot() {
   return (
     <Router>
+      <PageTracker />
       <Switch>
+        <Route path="/analytics" component={Analytics} />
         <Route path="/blog/:slug" component={ArticlePage} />
         <Route path="/blog" component={Blog} />
         <Route component={App} />
