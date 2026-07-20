@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "pnpm --filter @workspace/football-scores run build",
-  "outputDirectory": "artifacts/football-scores/dist",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
   "env": {
